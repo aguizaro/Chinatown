@@ -1,7 +1,7 @@
 class Play extends Phaser.Scene{
     constructor(){
         super({key: "playScene"})
-        this.VEL= 250;
+        this.VEL= 350;
     }
 
     create(){
@@ -12,15 +12,15 @@ class Play extends Phaser.Scene{
         //add layer
         const bgLayer= map.createLayer('Background', tileset, 0, 0)
         const roadLayer= map.createLayer('Roads', tileset, 0, 0)
-        const vehicleLayer= map.createLayer('Vehicles', tileset, 0, 0).setDepth(10)
-        const infraLayer= map.createLayer('Infrastructure', tileset, 0, 0).setDepth(10)
+        const vehicleBuildingLayer= map.createLayer('Vehicles/Buildings', tileset, 0, 0).setDepth(10)
+        const treeInfraLayer= map.createLayer('Trees/Infra', tileset, 0, 0).setDepth(10)
 
 
         //adds player
         this.player= this.physics.add.sprite(627, 245, 'player', 0).setOrigin(0.5)
         this.player.body.setCollideWorldBounds(true);
         this.player.body.setCircle(this.player.width/3)
-        this.player.flipX= true
+        //this.player.rotation= -Math.PI/2
         //adds target
         this.target= this.physics.add.sprite(1121, 395, 'target', 0).setOrigin(0.5)
         this.target.body.setCollideWorldBounds(true);
@@ -30,11 +30,11 @@ class Play extends Phaser.Scene{
         //this.player.angle= 0
         //enable collision
         roadLayer.setCollisionByProperty({collides: true})
-        vehicleLayer.setCollisionByProperty({collides: true})
-        //infraLayer.setCollisionByProperty({collides: true})
+        vehicleBuildingLayer.setCollisionByProperty({collides: true})
+        treeInfraLayer.setCollisionByProperty({collides: true})
         this.physics.add.collider(this.player, roadLayer)
-        this.physics.add.collider(this.player, vehicleLayer)
-        //this.physics.add.collider(this.player, infraLayer)
+        this.physics.add.collider(this.player, vehicleBuildingLayer)
+        this.physics.add.collider(this.player, treeInfraLayer)
 
         //camera movment
         this.cameras.main.setBounds(0, 0, map.widthInPixels, map.heightInPixels)
@@ -47,37 +47,64 @@ class Play extends Phaser.Scene{
 
     update(){
 
-
+        this.updateCar(this.player, this.playerDirection);
+        //this.updateCar_withSteering(this.target, this.targetDirection);
         console.log(this.player.x, this.player.y)
-        this.direction= new Phaser.Math.Vector2(0);
+
+
+    }
+
+    updateCar(car, direction){
+        direction= new Phaser.Math.Vector2(0);
         if (this.cursors.left.isDown){
-            this.player.setOrigin(0.4, 0.57)
-            this.player.body.offset.x= 0;
-            this.player.angle= 180
-            this.player.flipY= true;
-            this.direction.x= -1
+            car.setOrigin(0.4, 0.57)
+            car.body.offset.x= 0;
+            car.angle= 180
+            car.flipY= true;
+            direction.x= -1
         }else if(this.cursors.right.isDown){
-            this.player.setOrigin(0.5)
-            this.player.body.offset.x= 10
-            this.player.angle= 0;
-            this.player.flipY= false;
-            this.direction.x=1
+            car.setOrigin(0.5)
+            car.body.offset.x= 10
+            car.angle= 0;
+            car.flipY= false;
+            direction.x=1
         }
         if (this.cursors.up.isDown){
-            this.player.setOrigin(0.4, 0.7)
-            this.player.body.offset.x= 0;
-            this.player.flipY= true
-            this.player.angle= -90
-            this.direction.y= -1
+            car.setOrigin(0.4, 0.7)
+            car.body.offset.x= 0;
+            car.flipY= true
+            car.angle= -90
+            direction.y= -1
         }else if(this.cursors.down.isDown){
-            this.player.setOrigin(0.4, 0.4)
-            this.player.body.offset.x= 0;
-            this.player.flipY= true
-            this.player.angle= 90
-            this.direction.y=1
+            car.setOrigin(0.4, 0.4)
+            car.body.offset.x= 0;
+            car.flipY= true
+            car.angle= 90
+            direction.y=1
         }
+        direction.normalize();
+        car.setVelocity(this.VEL * direction.x, this.VEL * direction.y)
+    }
+
+    updateCar_withSteering(car){
+        if (this.cursors.up.isDown){
+            if (this.cursors.left.isDown){
+                car.rotation -= 0.1
+            }else if(this.cursors.right.isDown){
+                car.rotation += 0.1
+            }
+            car.setVelocity(Math.sin(car.rotation ) * this.VEL, -Math.cos(car.rotation ) * this.VEL)
         
-        this.direction.normalize();
-        this.player.setVelocity(this.VEL * this.direction.x, this.VEL * this.direction.y)
+        }else if(this.cursors.down.isDown){
+            if (this.cursors.left.isDown){
+                car.rotation += 0.1
+            }else if(this.cursors.right.isDown){
+                car.rotation -= 0.1
+            }
+            car.setVelocity(-Math.sin(car.rotation ) * this.VEL, Math.cos(car.rotation ) * this.VEL)
+        
+        }else{
+            car.setVelocity(0)
+        }
     }
 }
