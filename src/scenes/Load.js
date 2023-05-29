@@ -18,8 +18,8 @@ class Load extends Phaser.Scene {
 
         // load graphics assets
         this.load.path = "./assets/";
-        this.load.image("player","img/red_car.png")
-        this.load.image("target","img/black_car.png")
+        this.load.image("player","img/car_red.png")
+        this.load.image("target","img/car_black.png")
         this.load.image('tilesetImage', 'img/tileset.png')
         this.load.tilemapTiledJSON('tilemapJSON', 'img/world_map.json')
         // load sound
