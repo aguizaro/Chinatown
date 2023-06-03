@@ -1,7 +1,7 @@
 class Play extends Phaser.Scene{
     constructor(){
         super({key: "playScene"})
-        this.VEL= 120;
+        this.VEL= 90;
     }
 
     create(){
@@ -15,7 +15,7 @@ class Play extends Phaser.Scene{
         const treeInfraLayer= map.createLayer('Trees/Infra', tileset, 0, 0).setDepth(10)
 
         //adds player
-        this.player= this.physics.add.sprite(627, 245, 'player', 0).setOrigin(0.5).setScale(0.5)
+        this.player= this.physics.add.sprite(680, 380, 'player', 0).setOrigin(0.5).setScale(0.5)
         this.player.body.setCollideWorldBounds(true);
         this.player.body.setCircle(this.player.width/1.7)
         this.player.body.offset.y=20
@@ -26,19 +26,20 @@ class Play extends Phaser.Scene{
         */
 
         //add target's path
-        this.targetPath= this.add.path(772, 790)
-        this.targetPath.lineTo(567, 790)
-        this.targetPath.lineTo(567, 948)
-        this.targetPath.lineTo(292, 948)
-        this.targetPath.lineTo(292, 166)
-        this.targetPath.lineTo(837, 166)
-        this.targetPath.lineTo(837, 545)
-        this.targetPath.lineTo(202, 545)
-        this.targetPath.lineTo(202, 986)
-        this.targetPath.lineTo(875, 986)
-        this.targetPath.lineTo(875, 173)
-        this.targetPath.lineTo(1170, 173)
-        this.targetPath.lineTo(1170, 690)
+        this.targetPath= this.add.path(776, 880)
+        this.targetPath.lineTo(560, 880)
+        this.targetPath.lineTo(567, 1025)
+        this.targetPath.lineTo(292, 1025)
+        this.targetPath.lineTo(292, 250)
+        this.targetPath.lineTo(837, 250)
+        this.targetPath.lineTo(837, 626)
+        this.targetPath.lineTo(292, 626)
+        this.targetPath.lineTo(292, 250)
+        this.targetPath.lineTo(864, 250)
+        this.targetPath.lineTo(864, 92)
+        this.targetPath.lineTo(1196, 92)
+        this.targetPath.lineTo(1196, 201)
+        this.targetPath.lineTo(1170, 750)
         let graphics = this.add.graphics();
         graphics.lineStyle(2, 0xFFFFFF, 0.75);  // lineWidth, color, alpha
         //this.targetPath.draw(graphics)
@@ -78,12 +79,21 @@ class Play extends Phaser.Scene{
         //camera movment
         this.cameras.main.setBounds(0, 0, map.widthInPixels, map.heightInPixels)
         this.cameras.main.startFollow(this.player, true, 0.25, 0.25)
+        this.cameras.main.setZoom(1)
         this.physics.world.bounds.setTo(0, 0, map.widthInPixels, map.heightInPixels)
+        //UI
+        //this.UI= this.add.rectangle(0, 0, 1000, 200, 888, 333)
         //Minimap
-        this.minimap= this.cameras.add(0, 0, map.widthInPixels/12, map.heightInPixels/12, false, 'minimap').setAlpha(0.8).setZoom(0.2)
+        this.minimap= this.cameras.add(0, 0, map.widthInPixels/6, map.heightInPixels/12, false, 'minimap').setAlpha(1).setZoom(0.15)
         this.minimap.setBounds(0, 0, map.widthInPixels, map.heightInPixels)
         this.minimap.startFollow(this.player, true, 0.25, 0.25)
         this.minimap.ignore([treeInfraLayer, vehicleBuildingLayer])
+        //create mask for minimap
+        const maskShape = this.make.graphics();
+        //maskShape.fillStyle(0xffffff, 1);
+        maskShape.fillCircle(0,0, this.minimap.width/1.2)
+        const shape= maskShape.createGeometryMask()
+        this.minimap.setMask(shape)
         //const shape= this.player.createGeometryMask()
         //this.minimap.setMask(shape)
 
