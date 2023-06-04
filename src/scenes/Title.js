@@ -4,23 +4,17 @@ class Title extends Phaser.Scene{
     }
 
     create(){
-        this.add.text(game.config.width/2, game.config.height/2, "Chinatown 1974")
+        this.add.bitmapText(game.config.width/2, game.config.height/2, 'good_neighbors', "Chinatown 1974", 88).setOrigin(0.5).setTint(0xff0000)
+        this.add.bitmapText(game.config.width/2, game.config.height/2 + 200, 'good_neighbors', "Press [SPACE] to continue", 30).setOrigin(0.5).setTint(0xff0000)
+        this.cameras.main.setBackgroundColor(0x82b0fa)
         //input
         this.cursors= this.input.keyboard.createCursorKeys()
     }
 
     update(){
-        if (this.cursors.left.isDown){
+        if (this.cursors.space.isDown){
             //this.direction.x= -1
-            this.scene.start('playScene')
-        }else if(this.cursors.right.isDown){
-            //this.direction.x=1
-            this.scene.start('playScene')
-        }
-        if (this.cursors.up.isDown){
-            //this.direction.y= -1
-        }else if(this.cursors.down.isDown){
-            //this.direction.y=1
+            this.scene.start('instructionsScene')
         }
     }
 }

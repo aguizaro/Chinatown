@@ -22,6 +22,7 @@ class Load extends Phaser.Scene {
         this.load.image("target","img/car_black.png")
         this.load.image('tilesetImage', 'img/tileset.png')
         this.load.tilemapTiledJSON('tilemapJSON', 'img/world_map.json')
+        this.load.bitmapFont('good_neighbors', 'fonts/good_neighbors_starling.png', 'fonts/good_neighbors_starling.xml')
         // load sound
         //this.load.audio('groove', 'audio/groove.mp3');      
     }

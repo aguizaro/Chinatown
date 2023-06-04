@@ -1,7 +1,7 @@
 class Play extends Phaser.Scene{
     constructor(){
         super({key: "playScene"})
-        this.VEL= 90;
+        this.VEL= 190;
     }
 
     create(){
@@ -13,12 +13,16 @@ class Play extends Phaser.Scene{
         const roadLayer= map.createLayer('Roads', tileset, 0, 0)
         const vehicleBuildingLayer= map.createLayer('Vehicles/Buildings', tileset, 0, 0).setDepth(10)
         const treeInfraLayer= map.createLayer('Trees/Infra', tileset, 0, 0).setDepth(10)
+        const rockLayer= map.createLayer('Rocks', tileset, 0, 0)
+        const flowerLayer= map.createLayer('Flowers', tileset, 0, 0)
 
         //adds player
-        this.player= this.physics.add.sprite(680, 380, 'player', 0).setOrigin(0.5).setScale(0.5)
+        this.player= this.physics.add.sprite(612, 1187, 'player', 0).setOrigin(0.5).setScale(0.5)
         this.player.body.setCollideWorldBounds(true);
         this.player.body.setCircle(this.player.width/1.7)
         this.player.body.offset.y=20
+        //adds player icon
+        //this.playerIcon= this.add.image(this.player.x, this.player.y, "con")
         //adds target
         /*this.target= this.physics.add.sprite(772, 800, 'target', 0).setOrigin(0.5).setScale(0.5)
         this.target.body.setCollideWorldBounds(true);
@@ -40,8 +44,8 @@ class Play extends Phaser.Scene{
         this.targetPath.lineTo(1196, 92)
         this.targetPath.lineTo(1196, 201)
         this.targetPath.lineTo(1170, 750)
-        let graphics = this.add.graphics();
-        graphics.lineStyle(2, 0xFFFFFF, 0.75);  // lineWidth, color, alpha
+        //let graphics = this.add.graphics();
+        //graphics.lineStyle(2, 0xFFFFFF, 0.75);  // lineWidth, color, alpha
         //this.targetPath.draw(graphics)
 
         //add path follower
@@ -84,19 +88,18 @@ class Play extends Phaser.Scene{
         //UI
         //this.UI= this.add.rectangle(0, 0, 1000, 200, 888, 333)
         //Minimap
-        this.minimap= this.cameras.add(0, 0, map.widthInPixels/6, map.heightInPixels/12, false, 'minimap').setAlpha(1).setZoom(0.15)
+        this.minimap= this.cameras.add(0, 0, map.widthInPixels/6, map.heightInPixels/12, false, 'minimap').setAlpha(1).setZoom(0.15).setRoundPixels(true)
         this.minimap.setBounds(0, 0, map.widthInPixels, map.heightInPixels)
         this.minimap.startFollow(this.player, true, 0.25, 0.25)
-        this.minimap.ignore([treeInfraLayer, vehicleBuildingLayer])
+        this.minimap.ignore([treeInfraLayer, vehicleBuildingLayer, roadLayer])
         //create mask for minimap
         const maskShape = this.make.graphics();
-        //maskShape.fillStyle(0xffffff, 1);
-        maskShape.fillCircle(0,0, this.minimap.width/1.2)
+        //maskShape.fillStyle(0xffffff)
+        maskShape.fillCircle(90,0, this.minimap.width/1.3)
         const shape= maskShape.createGeometryMask()
         this.minimap.setMask(shape)
         //const shape= this.player.createGeometryMask()
         //this.minimap.setMask(shape)
-
 
         //input
         this.cursors= this.input.keyboard.createCursorKeys();
@@ -104,7 +107,16 @@ class Play extends Phaser.Scene{
 
     update(){
         this.updateCar_withSteering(this.player)//, this.playerDirection);
+        this.updateMiniMapAlpha();
         console.log(this.player.x, this.player.y)
+    }
+
+    updateMiniMapAlpha(){
+        if (this.player.x < 200 && this.player.y < 200){
+            this.minimap.setAlpha(0.2)
+        }else{
+            this.minimap.setAlpha(1)
+        }
     }
     
 
