@@ -9,11 +9,13 @@ class Title extends Phaser.Scene{
         this.cameras.main.setBackgroundColor(0x82b0fa)
         //input
         this.cursors= this.input.keyboard.createCursorKeys()
+        //UI SFX
+        this.UIsfx= this.sound.add('click')
     }
 
     update(){
         if (this.cursors.space.isDown){
-            //this.direction.x= -1
+            this.UIsfx.play()
             this.scene.start('instructionsScene')
         }
     }

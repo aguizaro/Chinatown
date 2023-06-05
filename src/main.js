@@ -14,13 +14,14 @@ let config = {
     physics:{
         default: 'arcade',
         arcade: {
-            debug: true,
+            debug: false,
             pixelArt: true
         }
     }, 
     zoom: 1.45,
     autoCenter: Phaser.Scale.CENTER_BOTH,
-    scene: [Load, Title, Instructions, Play]
+    scene: [Load, Title, Instructions, ScoreDisplay, Play]
 }
 
 const game= new Phaser.Game(config)
+let space_key

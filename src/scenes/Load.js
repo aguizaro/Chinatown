@@ -24,6 +24,12 @@ class Load extends Phaser.Scene {
         this.load.tilemapTiledJSON('tilemapJSON', 'img/world_map.json')
         this.load.bitmapFont('good_neighbors', 'fonts/good_neighbors_starling.png', 'fonts/good_neighbors_starling.xml')
         // load sound
+        this.load.audio('bgMusic', 'audio/outcast.mp3')
+        this.load.audio('click', 'audio/camera_click.wav')
+        this.load.audio('prompt', 'audio/prompt.wav')
+        this.load.audio('shutter', 'audio/shutter.wav')
+        this.load.audio('crash1', 'audio/crash1.wav')
+        this.load.audio('crash2', 'audio/crash2.wav')
         //this.load.audio('groove', 'audio/groove.mp3');      
     }
 
