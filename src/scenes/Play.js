@@ -37,8 +37,9 @@ class Play extends Phaser.Scene{
         this.player.body.setCircle(this.player.width/1.7)
         this.player.body.offset.y=20
 
-        //add follower for the target's path
+        //create follower and add temporary target to be destroyed when the follower starts
         this.targetFollower= this.add.follower()
+        this.targetFollower.setPosition(-100, -100) //out of minimap bounds
         this.tempTarget= this.add.image(776, 880, 'target').setOrigin(0.5).setScale(0.5)
         this.tempTarget.flipX= true;
 
@@ -70,7 +71,7 @@ class Play extends Phaser.Scene{
         this.cameras.main.setZoom(1)
         this.physics.world.bounds.setTo(0, 0, this.map.widthInPixels, this.map.heightInPixels)
         //Instructions prompt
-        this.instructions= this.add.bitmapText(game.config.width/2 + 50, 20 , 'good_neighbors', 'Find Hollis. Reports say he drives a black vehicle.', 18).setOrigin(0.5).setTint(0xffffff).setScrollFactor(0,0).setDepth(100)
+        this.instructions= this.add.bitmapText(game.config.width/2 + 50, 20 , 'good_neighbors', 'Find Hollis. Report says he drives a black vehicle.', 18).setOrigin(0.5).setTint(0xffffff).setScrollFactor(0,0).setDepth(100)
         this.instructions_bg= this.add.rectangle(this.instructions.x, this.instructions.y, this.instructions.width + 5, this.instructions.height + 5, 0x000000, 0.75).setScrollFactor(0,0).setDepth(99)
         //Minimap
         this.minimap= this.cameras.add(0, 0, this.map.widthInPixels/6, this.map.heightInPixels/12, false, 'minimap').setZoom(0.14).setRoundPixels(true).setScroll(0,0)
