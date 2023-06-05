@@ -168,7 +168,7 @@ class Play extends Phaser.Scene{
             from: 0,            // points allow a path are values 0–1
             to: 1,
             delay: 0,
-            duration: 50000,
+            duration: 55000,
             hold: 0,
             repeat: 0,
             yoyo: false,
@@ -177,7 +177,7 @@ class Play extends Phaser.Scene{
         });
         //change instruction text after target is parked
         this.time.addEvent({
-            delay: 50000,
+            delay: 55000,
             callback: ()=>{
                 this.instructions.setText('Press [SPACE] to take a photograph.')
                 this.UIprompt.play()
@@ -319,7 +319,7 @@ class Play extends Phaser.Scene{
         this.cameras.main.flash(500, 255, 255, 255)
         this.numPhotos++ //count photos taken
         this.points+= 10000/this.calcDistance(this.player, this.targetFollower) //more points the closer you are to the target when taking photo
-        this.cameraSFX.play()
+        if (!this.cameraSFX.isPlaying) this.cameraSFX.play()
     }
 
     //finish level 1 and launch score display
@@ -332,16 +332,16 @@ class Play extends Phaser.Scene{
     updateCar_withSteering(car){
         if (this.cursors.up.isDown){
             if (this.cursors.left.isDown){
-                car.rotation -= 0.045
+                car.rotation -= 0.06
             }else if(this.cursors.right.isDown){
-                car.rotation += 0.045
+                car.rotation += 0.06
             }
             car.setVelocity(Math.sin(car.rotation ) * this.VEL, -Math.cos(car.rotation ) * this.VEL)
         }else if(this.cursors.down.isDown){
             if (this.cursors.left.isDown){
-                car.rotation += 0.045
+                car.rotation += 0.06
             }else if(this.cursors.right.isDown){
-                car.rotation -= 0.045
+                car.rotation -= 0.06
             }
             car.setVelocity(-Math.sin(car.rotation ) * this.VEL, Math.cos(car.rotation ) * this.VEL)
         }else{
