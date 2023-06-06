@@ -1,5 +1,5 @@
 // Antonio Guizar Orozco
-// Tilemap Tutorial
+// Chinatown 1974
 
 'use strict';
 

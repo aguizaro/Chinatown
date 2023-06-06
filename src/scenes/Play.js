@@ -2,18 +2,21 @@ class Play extends Phaser.Scene{
     constructor(){
         super({key: "playScene"})
         this.VEL= 100
-        this.targetActive= false
-        this.targetStopped= false;
-        this.caught= false
-        this.tookPhoto= false
-        this.numPhotos= 0;
-        this.points= 0;
-        this.level1_done= false;
-        this.waitTime= 6000
         //this.lost= false
     }
 
     create(){
+        //game vars
+        this.targetActive= false
+        this.targetStopped= false
+        this.caught= false
+        this.tookPhoto= false
+        this.numPhotos= 0
+        this.points= 0;
+        this.level1_done= false
+        this.waitTime= 6000
+        this.photosRemaining= 50
+
         //tilemap game world
         this.map= this.add.tilemap('tilemapJSON')
         this.tileset= this.map.addTilesetImage('tileset', 'tilesetImage')
@@ -54,13 +57,13 @@ class Play extends Phaser.Scene{
         this.vehicleBuildingLayer.setCollisionByProperty({collides: true})
         this.treeInfraLayer.setCollisionByProperty({collides: true})
         this.physics.add.collider(this.player, this.roadLayer, ()=>{
-            if (!this.crash2SFX.isPlaying)this.crash2SFX.play()
+            if (!this.crash2SFX.isPlaying) this.worldObjCollision()
         })
         this.physics.add.collider(this.player, this.vehicleBuildingLayer, ()=>{
-            if (!this.crash2SFX.isPlaying)this.crash2SFX.play()
+            if (!this.crash2SFX.isPlaying) this.worldObjCollision()
         })
         this.physics.add.collider(this.player, this.treeInfraLayer, ()=>{
-            if (!this.crash2SFX.isPlaying)this.crash2SFX.play()
+            if (!this.crash2SFX.isPlaying) this.worldObjCollision()
         })
         
 
@@ -73,20 +76,23 @@ class Play extends Phaser.Scene{
         //Instructions prompt
         this.instructions= this.add.bitmapText(game.config.width/2 + 50, 20 , 'good_neighbors', 'Find Hollis. Report says he drives a black vehicle.', 18).setOrigin(0.5).setTint(0xffffff).setScrollFactor(0,0).setDepth(100)
         this.instructions_bg= this.add.rectangle(this.instructions.x, this.instructions.y, this.instructions.width + 5, this.instructions.height + 5, 0x000000, 0.75).setScrollFactor(0,0).setDepth(99)
+        //Displays score and photosRemaining
+        this.pointsText= this.add.bitmapText(game.config.width/2 + 265, 8   , 'good_neighbors', 'POINTS', 15).setOrigin(0.5).setTint(0xffffff).setScrollFactor(0,0).setDepth(100)
+        this.ponitsDisplay= this.add.bitmapText(game.config.width/2 + 265, 30  , 'good_neighbors', this.points, 18).setOrigin(0.5).setTint(0xffffff).setScrollFactor(0,0).setDepth(100)
+        this.ponitsDisplay_bg= this.add.rectangle(this.ponitsDisplay.x,  this.ponitsDisplay.y, this.ponitsDisplay.width + 20, this.ponitsDisplay.height + 5, 0x000000, 0.75).setScrollFactor(0,0).setDepth(99)
+        this.remainingPhotoText= this.add.bitmapText(game.config.width/2 + 310, 8  , 'good_neighbors', 'FILM', 15 ).setOrigin(0.5).setTint(0xff0000).setScrollFactor(0,0).setDepth(100)
+        this.remainingPhotoDisplay= this.add.bitmapText(game.config.width/2 + 310, 30  , 'good_neighbors', this.points, 18).setOrigin(0.5).setTint(0xff0000).setScrollFactor(0,0).setDepth(100)
+        this.remainingPhotoDisplay_bg= this.add.rectangle(this.remainingPhotoDisplay.x, this.remainingPhotoDisplay.y, this.remainingPhotoDisplay.width + 20, this.remainingPhotoDisplay.height + 5, 0x000000, 0.75).setScrollFactor(0,0).setDepth(99)
         //Minimap
         this.minimap= this.cameras.add(0, 0, this.map.widthInPixels/6, this.map.heightInPixels/12, false, 'minimap').setZoom(0.14).setRoundPixels(true).setScroll(0,0)
         this.minimap.setBounds(0, 0, this.map.widthInPixels, this.map.heightInPixels)
         this.minimap.startFollow(this.player, true, 0.25,  0.25)
-        this.minimap.ignore([this.treeInfraLayer, this.vehicleBuildingLayer, this.roadLayer, this.rockLayer, this.flowerLayer, this.tempTarget, this.instructions, this.instructions_bg, this.player, this.targetFollower])
+        this.minimap.ignore([this.treeInfraLayer, this.vehicleBuildingLayer, this.roadLayer, this.rockLayer, this.flowerLayer, this.tempTarget, this.instructions, this.instructions_bg, this.player, this.targetFollower, this.ponitsDisplay, this.pointsText, this.ponitsDisplay_bg, this.remainingPhotoText, this.remainingPhotoDisplay, this.remainingPhotoDisplay_bg])
         //create mask for minimap
         const maskShape = this.make.graphics();
         maskShape.fillCircle(90,0, this.minimap.width/1.3)
         const shape= maskShape.createGeometryMask()
-        this.minimap.setMask(shape)
-
-        //display warning if player lost previously
-        if(this.lost == true)
-            console.log('LOST PREVIOUSLY')
+        this.minimap.setMask(shape) 
 
         //input
         this.cursors= this.input.keyboard.createCursorKeys();
@@ -98,22 +104,24 @@ class Play extends Phaser.Scene{
         //update steering/ player movment
         this.updateCar_withSteering(this.player)
         //update minimap
-        this.updateMiniMap();
-        //check distance and start target movement if close enough
-        if (!this.targetActive) 
-            if(this.checkDistance(this.player, this.tempTarget, 100)){
-                this.instructions.setText('Follow Hollis. Do not get caught.')
+        this.updateMiniMap()
+        //update UI stats
+        this.updateUIDisplay()
+
+        //check distance and start target movement if close enough during level1
+        if( (!this.targetActive) && !this.level1_done){
+            if(this.checkDistance(this.player, this.tempTarget, 200)){
+                this.instructions.setText('Follow Hollis. Take photographs with [SPACE].')
                 this.UIprompt.play()
                 //this.instructions_bg.setX(this.instructions.x)
                 //this.instructions_bg.setW(this.instructions.width- 50)
                 this.startTargetPath1()
             }
+        }
 
-        //if target is not currently moving, allow player to take photo
-        if (this.targetStopped){
-            if (Phaser.Input.Keyboard.JustDown(space_key)){
-                this.takePhoto()
-            }
+        //if target is active and player has film left, allow them to take a photo with SPACE
+        if ((Phaser.Input.Keyboard.JustDown(space_key)) && this.targetActive){
+            if (this.photosRemaining > 0) this.takePhoto()
         }
         //if player completes level1, finish level when they arrive at Headquartes
         if (this.level1_done)
@@ -126,6 +134,8 @@ class Play extends Phaser.Scene{
         //console.log(this.calcDistance(this.player, this.targetFollower))
     }
 
+    //reduce alpha of minimap if player drives over it
+    //update minimap icons
     updateMiniMap(){
         if (this.player.x < 230 && this.player.y < 200){
             this.minimap.setAlpha(0.2)
@@ -139,6 +149,7 @@ class Play extends Phaser.Scene{
         this.minimap.ignore(this.targetFollower)
     }
 
+    //target will travel around the game map and end up at the reservoir then wait for a few secs and start path 2
     startTargetPath1(){
         //destroy temp target 
         this.tempTarget.destroy()
@@ -168,7 +179,7 @@ class Play extends Phaser.Scene{
             from: 0,            // points allow a path are values 0–1
             to: 1,
             delay: 0,
-            duration: 55000,
+            duration: 57000,
             hold: 0,
             repeat: 0,
             yoyo: false,
@@ -177,7 +188,7 @@ class Play extends Phaser.Scene{
         });
         //change instruction text after target is parked
         this.time.addEvent({
-            delay: 55000,
+            delay: 57000,
             callback: ()=>{
                 this.instructions.setText('Press [SPACE] to take a photograph.')
                 this.UIprompt.play()
@@ -211,6 +222,7 @@ class Play extends Phaser.Scene{
         this.targetActive= true;
     }
 
+    //target travels from reservoir to parking spot, wait a few secs and do pagth 3
     startTargetPath2(){
         //make new target path
         this.targetPath.destroy()
@@ -261,6 +273,7 @@ class Play extends Phaser.Scene{
             }
         })
     }
+    //target travels from parking to farm and stays there
     startTargetPath3(){
         //make new target path
         this.targetPath.destroy()
@@ -298,6 +311,7 @@ class Play extends Phaser.Scene{
                         //finish this level
                         this.targetStopped= false
                         this.level1_done= true;
+                        this.targetActive= false
                     }
                 })
             }
@@ -316,10 +330,15 @@ class Play extends Phaser.Scene{
 
     //takes photograph
     takePhoto(){
-        this.cameras.main.flash(500, 255, 255, 255)
-        this.numPhotos++ //count photos taken
-        this.points+= 10000/this.calcDistance(this.player, this.targetFollower) //more points the closer you are to the target when taking photo
-        if (!this.cameraSFX.isPlaying) this.cameraSFX.play()
+        if (this.targetActive){
+            if (!this.cameraSFX.isPlaying){
+                this.cameras.main.flash(500, 255, 255, 255)
+                this.numPhotos++ //count photos taken
+                this.points+= 10000/this.calcDistance(this.player, this.targetFollower) //more points the closer you are to the target when taking photo
+                this.photosRemaining-- //decrement number of photos left 
+                this.cameraSFX.play()
+            }
+        }
     }
 
     //finish level 1 and launch score display
@@ -355,10 +374,39 @@ class Play extends Phaser.Scene{
         this.cameras.main.shake()
         this.points= 0;
         if (!this.crash1SFX.isPlaying) this.crash1SFX.play()
+        this.time.addEvent({
+            delay: 500,
+            callback: ()=>{
+                this.UIprompt.play()
+                this.bgm.stop()
+                this.scene.start('playScene', this.bgm)
+            }
+        })
 
     }
 
+    //update score and photo display
+    updateUIDisplay(){
+        this.ponitsDisplay.setText(Math.floor(this.points))
+        this.remainingPhotoDisplay.setText(this.photosRemaining)
+    }
 
+    //event where player collides with game world object
+    worldObjCollision(){
+        this.crash2SFX.play()
+        if (this.points >= 100)
+            this.points-= 100
+        else 
+            this.points= 0
+    }
+
+    //recive data from parent scene
+    init(data){
+        this.bgm= data
+        if (!this.bgm.isPlaying) this.bgm.play()
+    }
+    
+    /*
     updateCar(car, direction){
         direction= new Phaser.Math.Vector2(0);
         if (this.cursors.left.isDown){
@@ -390,9 +438,5 @@ class Play extends Phaser.Scene{
         direction.normalize();
         car.setVelocity(this.VEL * direction.x, this.VEL * direction.y)
     }
-    
-    //recive data from parent scene (could be this scene)
-    init(data){
-        this.bgm= data
-    }
+    */
 }

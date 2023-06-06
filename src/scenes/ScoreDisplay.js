@@ -23,6 +23,8 @@ class ScoreDisplay extends Phaser.Scene{
         this.cursors= this.input.keyboard.createCursorKeys();
         //UI SFX
         this.UIsfx= this.sound.add('click')
+        this.promptSFX= this.sound.add('prompt')
+        this.promptSFX.play()
     }
 
     update(){
