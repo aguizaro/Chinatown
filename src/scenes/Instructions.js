@@ -1,9 +1,12 @@
 class Instructions extends Phaser.Scene{
     constructor(){
         super({key: 'instructionsScene'})
+        this.level= 1
+        this.changedText= false
     }
 
     create(){
+        //background color
         this.cameras.main.setBackgroundColor(0x82b0fa)
         //subheading
         this.add.bitmapText(game.config.width/2, game.config.height/2 - 245, 'good_neighbors', "Instructions", 60).setOrigin(0.5).setTint(0xff0000)
@@ -18,9 +21,6 @@ class Instructions extends Phaser.Scene{
         this.add.bitmapText(game.config.width/2 , game.config.height/2 - 20, 'good_neighbors', "[SPACE]", 30).setOrigin(0.5).setTint(0xff0000)
         this.add.bitmapText(game.config.width/2 - 20, game.config.height/2 + 20 , 'good_neighbors', "      snapshots available.  ", 30).setOrigin(0.5).setTint(0xffffff)
         this.add.bitmapText(game.config.width/2 - 150, game.config.height/2 + 20 , 'good_neighbors', "50", 30).setOrigin(0.5).setTint(0xff0000)
-
-
-
         this.add.bitmapText(game.config.width/2 , game.config.height/2 + 60, 'good_neighbors', "Photographs are worth more points the closer they are.", 30).setOrigin(0.5).setTint(0xffffff)
         this.add.bitmapText(game.config.width/2 , game.config.height/2 + 90, 'good_neighbors', "taken to Hollis.", 30).setOrigin(0.5).setTint(0xffffff)
         this.add.bitmapText(game.config.width/2 - 40, game.config.height/2 + 130, 'good_neighbors', "/             arrow keys                   /", 30).setOrigin(0.5).setTint(0xffffff)
@@ -32,6 +32,7 @@ class Instructions extends Phaser.Scene{
         //input
         this.cursors= this.input.keyboard.createCursorKeys()
 
+        //create and start background music
         this.bgm = this.sound.add('bgMusic', { 
             mute: false,
             volume: 0.3,
@@ -44,9 +45,13 @@ class Instructions extends Phaser.Scene{
     }
 
     update(){
+        //start next scene when space is pressed
         if (this.cursors.space.isDown){
             this.UIsfx.play()
-            this.scene.start('playScene', this.bgm)
+            this.scene.start('playScene', {bgm: this.bgm, level: 1})
+        }
+        if (this.level == 2 && !this.changedText){
+            //maybe use this to change text or maybe make a new scene for L2 instructions
         }
     }
 }

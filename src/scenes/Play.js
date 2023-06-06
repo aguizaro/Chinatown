@@ -74,8 +74,8 @@ class Play extends Phaser.Scene{
         this.cameras.main.setZoom(1)
         this.physics.world.bounds.setTo(0, 0, this.map.widthInPixels, this.map.heightInPixels)
         //Instructions prompt
-        this.instructions= this.add.bitmapText(game.config.width/2 + 50, 20 , 'good_neighbors', 'Find Hollis. Report says he drives a black vehicle.', 18).setOrigin(0.5).setTint(0xffffff).setScrollFactor(0,0).setDepth(100)
-        this.instructions_bg= this.add.rectangle(this.instructions.x, this.instructions.y, this.instructions.width + 5, this.instructions.height + 5, 0x000000, 0.75).setScrollFactor(0,0).setDepth(99)
+        this.instructions= this.add.bitmapText(game.config.width/2 + 40, 20 , 'good_neighbors', 'Find Hollis. Report says he drives a black vehicle.', 18).setOrigin(0.5).setTint(0xffffff).setScrollFactor(0,0).setDepth(100)
+        this.instructions_bg= this.add.rectangle(this.instructions.x, this.instructions.y, this.instructions.width + 55, this.instructions.height + 5, 0x000000, 0.75).setScrollFactor(0,0).setDepth(99)
         //Displays score and photosRemaining
         this.pointsText= this.add.bitmapText(game.config.width/2 + 265, 8   , 'good_neighbors', 'POINTS', 15).setOrigin(0.5).setTint(0xffffff).setScrollFactor(0,0).setDepth(100)
         this.ponitsDisplay= this.add.bitmapText(game.config.width/2 + 265, 30  , 'good_neighbors', this.points, 18).setOrigin(0.5).setTint(0xffffff).setScrollFactor(0,0).setDepth(100)
@@ -108,34 +108,35 @@ class Play extends Phaser.Scene{
         //update UI stats
         this.updateUIDisplay()
 
-        //check distance and start target movement if close enough during level1
-        if( (!this.targetActive) && !this.level1_done){
-            if(this.checkDistance(this.player, this.tempTarget, 200)){
-                this.instructions.setText('Follow Hollis. Take photographs with [SPACE].')
-                this.UIprompt.play()
-                //this.instructions_bg.setX(this.instructions.x)
-                //this.instructions_bg.setW(this.instructions.width- 50)
-                this.startTargetPath1()
-            }
-        }
-
-        //if target is active and player has film left, allow them to take a photo with SPACE
-        if ((Phaser.Input.Keyboard.JustDown(space_key)) && this.targetActive){
-            if (this.photosRemaining > 0) this.takePhoto()
-        }
-        //if player completes level1, finish level when they arrive at Headquartes
-        if (this.level1_done)
-            if (this.player.x > 973 && this.player.x < 1110)
-                if (this.player.y > 276 && this.player.y < 375){
-                    this.finish_level1()
-                    this.level1_done= false;
+        //this is the update loop for level 1
+        if (this.level == 1){
+            //check distance and start target movement if close enough during level1
+            if( (!this.targetActive) && !this.level1_done){
+                if(this.checkDistance(this.player, this.tempTarget, 200)){
+                    this.instructions.setText('Follow Hollis. Take photographs with [SPACE].')
+                    this.UIprompt.play()
+                    //this.instructions_bg.setX(this.instructions.x)
+                    //this.instructions_bg.setW(this.instructions.width- 50)
+                    this.startTargetPath1()
                 }
+            }
 
+            //if target is active and player has film left, allow them to take a photo with SPACE
+            if ((Phaser.Input.Keyboard.JustDown(space_key)) && this.targetActive){
+                if (this.photosRemaining > 0) this.takePhoto()
+            }
+            //if player completes level1, finish level when they arrive at Headquartes
+            if (this.level1_done)
+                if (this.player.x > 973 && this.player.x < 1110)
+                    if (this.player.y > 276 && this.player.y < 375){
+                        this.finish_level1()
+                        this.level1_done= false;
+                    }
+        }
         //console.log(this.calcDistance(this.player, this.targetFollower))
     }
 
-    //reduce alpha of minimap if player drives over it
-    //update minimap icons
+    //reduce alpha of minimap if player drives over it and update minimap icons
     updateMiniMap(){
         if (this.player.x < 230 && this.player.y < 200){
             this.minimap.setAlpha(0.2)
@@ -179,7 +180,7 @@ class Play extends Phaser.Scene{
             from: 0,            // points allow a path are values 0–1
             to: 1,
             delay: 0,
-            duration: 57000,
+            duration: 6000,
             hold: 0,
             repeat: 0,
             yoyo: false,
@@ -188,16 +189,16 @@ class Play extends Phaser.Scene{
         });
         //change instruction text after target is parked
         this.time.addEvent({
-            delay: 57000,
+            delay: 6000,
             callback: ()=>{
-                this.instructions.setText('Press [SPACE] to take a photograph.')
+                this.instructions.setText('Hollis has stopped. Press [SPACE] to take a photograph.')
                 this.UIprompt.play()
                 this.targetStopped= true
                 //wait then continue moving target again
                 this.time.addEvent({
                     delay: this.waitTime,
                     callback: ()=>{
-                        this.instructions.setText('Follow Hollis. Do not get caught.')
+                        this.instructions.setText('Follow Hollis. Take photographs with [SPACE].')
                         this.UIprompt.play()
                         //start target path 2
                         this.targetStopped= false
@@ -256,14 +257,14 @@ class Play extends Phaser.Scene{
         this.time.addEvent({
             delay: 40000,
             callback: ()=>{
-                this.instructions.setText('Press [SPACE] to take a photograph.')
+                this.instructions.setText('Hollis has stopped. Press [SPACE] to take a photograph.')
                 this.UIprompt.play()
                 this.targetStopped= true
                 //wait then continue moving target again
                 this.time.addEvent({
                     delay: this.waitTime,
                     callback: ()=>{
-                        this.instructions.setText('Follow Hollis. Do not get caught.')
+                        this.instructions.setText('Follow Hollis. Take photographs with [SPACE].')
                         this.UIprompt.play()
                         //start target path 3
                         this.targetStopped= false
@@ -299,7 +300,7 @@ class Play extends Phaser.Scene{
         this.time.addEvent({
             delay: 10000,
             callback: ()=>{
-                this.instructions.setText('Press [SPACE] to take a photograph.')
+                this.instructions.setText('Hollis has stopped. Press [SPACE] to take a photograph.')
                 this.UIprompt.play()
                 this.targetStopped= true
                 //wait then continue moving target again
@@ -379,10 +380,9 @@ class Play extends Phaser.Scene{
             callback: ()=>{
                 this.UIprompt.play()
                 this.bgm.stop()
-                this.scene.start('playScene', this.bgm)
+                this.scene.start('playScene', {bgm: this.bgm, level: this.level})
             }
         })
-
     }
 
     //update score and photo display
@@ -402,7 +402,8 @@ class Play extends Phaser.Scene{
 
     //recive data from parent scene
     init(data){
-        this.bgm= data
+        this.bgm= data.bgm;
+        this.level= data.level;
         if (!this.bgm.isPlaying) this.bgm.play()
     }
     
