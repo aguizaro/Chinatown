@@ -1,8 +1,7 @@
-class Play extends Phaser.Scene{
+class Play2 extends Phaser.Scene{
     constructor(){
-        super({key: "playScene"})
+        super({key: "playScene2"})
         this.VEL= 100
-        //this.lost= false
     }
 
     create(){
@@ -35,10 +34,22 @@ class Play extends Phaser.Scene{
         this.flowerLayer= this.map.createLayer('Flowers', this.tileset, 0, 0)
 
         //adds player
-        this.player= this.physics.add.sprite(1021, 298, 'player', 0).setOrigin(0.5).setScale(0.5)
+        this.player= this.physics.add.sprite(572, 1187, 'player', 0).setOrigin(0.5).setScale(0.5)
         this.player.body.setCollideWorldBounds(true);
         this.player.body.setCircle(this.player.width/1.7)
         this.player.body.offset.y=20
+
+        //if player previously lost, display text that slowly dissapears
+        this.tempText= this.add.bitmapText(500, 1000, 'good_neighbors', 'TRY AGAIN', 100 ).setOrigin(0.5).setTint(0xffffff).setAlpha(0).setDepth(200)
+        if (this.died){
+            this.tempText.setAlpha(0.8)
+            this.time.addEvent({
+                delay: 2000,
+                callback: ()=>{
+                    this.tempText.alpha= 0
+                }
+            })
+        }
 
         //create follower and add temporary target to be destroyed when the follower starts
         this.targetFollower= this.add.follower()
@@ -65,17 +76,18 @@ class Play extends Phaser.Scene{
         this.physics.add.collider(this.player, this.treeInfraLayer, ()=>{
             if (!this.crash2SFX.isPlaying) this.worldObjCollision()
         })
-        
-
+    
         //camera movment
         this.cameras.main.setBounds(0, 0, this.map.widthInPixels, this.map.heightInPixels)
         this.cameras.main.startFollow(this.player, true, 0.25, 0.25)
         this.cameras.main.ignore([this.HQ, this.playerIcon, this.targetIcon])
         this.cameras.main.setZoom(1)
         this.physics.world.bounds.setTo(0, 0, this.map.widthInPixels, this.map.heightInPixels)
+       
         //Instructions prompt
         this.instructions= this.add.bitmapText(game.config.width/2 + 40, 20 , 'good_neighbors', 'Find Hollis. Report says he drives a black vehicle.', 18).setOrigin(0.5).setTint(0xffffff).setScrollFactor(0,0).setDepth(100)
-        this.instructions_bg= this.add.rectangle(this.instructions.x, this.instructions.y, this.instructions.width + 55, this.instructions.height + 5, 0x000000, 0.75).setScrollFactor(0,0).setDepth(99)
+        this.instructions_bg= this.add.rectangle(this.instructions.x, this.instructions.y, this.instructions.width + 60, this.instructions.height + 5, 0x000000, 0.75).setScrollFactor(0,0).setDepth(99)
+     
         //Displays score and photosRemaining
         this.pointsText= this.add.bitmapText(game.config.width/2 + 265, 8   , 'good_neighbors', 'POINTS', 15).setOrigin(0.5).setTint(0xffffff).setScrollFactor(0,0).setDepth(100)
         this.ponitsDisplay= this.add.bitmapText(game.config.width/2 + 265, 30  , 'good_neighbors', this.points, 18).setOrigin(0.5).setTint(0xffffff).setScrollFactor(0,0).setDepth(100)
@@ -83,11 +95,13 @@ class Play extends Phaser.Scene{
         this.remainingPhotoText= this.add.bitmapText(game.config.width/2 + 310, 8  , 'good_neighbors', 'FILM', 15 ).setOrigin(0.5).setTint(0xff0000).setScrollFactor(0,0).setDepth(100)
         this.remainingPhotoDisplay= this.add.bitmapText(game.config.width/2 + 310, 30  , 'good_neighbors', this.points, 18).setOrigin(0.5).setTint(0xff0000).setScrollFactor(0,0).setDepth(100)
         this.remainingPhotoDisplay_bg= this.add.rectangle(this.remainingPhotoDisplay.x, this.remainingPhotoDisplay.y, this.remainingPhotoDisplay.width + 20, this.remainingPhotoDisplay.height + 5, 0x000000, 0.75).setScrollFactor(0,0).setDepth(99)
+     
         //Minimap
         this.minimap= this.cameras.add(0, 0, this.map.widthInPixels/6, this.map.heightInPixels/12, false, 'minimap').setZoom(0.14).setRoundPixels(true).setScroll(0,0)
         this.minimap.setBounds(0, 0, this.map.widthInPixels, this.map.heightInPixels)
         this.minimap.startFollow(this.player, true, 0.25,  0.25)
-        this.minimap.ignore([this.treeInfraLayer, this.vehicleBuildingLayer, this.roadLayer, this.rockLayer, this.flowerLayer, this.tempTarget, this.instructions, this.instructions_bg, this.player, this.targetFollower, this.ponitsDisplay, this.pointsText, this.ponitsDisplay_bg, this.remainingPhotoText, this.remainingPhotoDisplay, this.remainingPhotoDisplay_bg])
+        this.minimap.ignore([this.treeInfraLayer, this.vehicleBuildingLayer, this.roadLayer, this.rockLayer, this.flowerLayer, this.tempTarget, this.instructions, this.instructions_bg, this.player, this.targetFollower, this.ponitsDisplay, this.pointsText, this.ponitsDisplay_bg, this.remainingPhotoText, this.remainingPhotoDisplay, this.remainingPhotoDisplay_bg, this.tempText])
+      
         //create mask for minimap
         const maskShape = this.make.graphics();
         maskShape.fillCircle(90,0, this.minimap.width/1.3)
@@ -108,32 +122,33 @@ class Play extends Phaser.Scene{
         //update UI stats
         this.updateUIDisplay()
 
-        //this is the update loop for level 1
-        if (this.level == 1){
-            //check distance and start target movement if close enough during level1
-            if( (!this.targetActive) && !this.level1_done){
-                if(this.checkDistance(this.player, this.tempTarget, 200)){
-                    this.instructions.setText('Follow Hollis. Take photographs with [SPACE].')
-                    this.UIprompt.play()
-                    //this.instructions_bg.setX(this.instructions.x)
-                    //this.instructions_bg.setW(this.instructions.width- 50)
-                    this.startTargetPath1()
+        //check distance and start target movement if close enough during level1
+        if( (!this.targetActive) && !this.level1_done){
+            if(this.checkDistance(this.player, this.tempTarget, 200)){
+                this.instructions.setText('Follow Hollis. Take photographs with [SPACE].')
+                this.UIprompt.play()
+                //this.instructions_bg.setX(this.instructions.x)
+                //this.instructions_bg.setW(this.instructions.width- 50)
+                this.startTargetPath1()
+            }
+        }
+
+        //if target is active and player has film left, allow them to take a photo with SPACE
+        if ((Phaser.Input.Keyboard.JustDown(space_key)) && this.targetActive){
+            if (this.photosRemaining > 0) this.takePhoto()
+        }
+
+        //if player completes level1, finish level when they arrive at Headquartes
+        if (this.level1_done){
+            if (this.player.x > 973 && this.player.x < 1110){
+                if (this.player.y > 276 && this.player.y < 375){
+                    this.finish_level1()
+                    this.level1_done= false;
                 }
             }
-
-            //if target is active and player has film left, allow them to take a photo with SPACE
-            if ((Phaser.Input.Keyboard.JustDown(space_key)) && this.targetActive){
-                if (this.photosRemaining > 0) this.takePhoto()
-            }
-            //if player completes level1, finish level when they arrive at Headquartes
-            if (this.level1_done)
-                if (this.player.x > 973 && this.player.x < 1110)
-                    if (this.player.y > 276 && this.player.y < 375){
-                        this.finish_level1()
-                        this.level1_done= false;
-                    }
         }
-        //console.log(this.calcDistance(this.player, this.targetFollower))
+
+        console.log(this.player.x, this.player.y);
     }
 
     //reduce alpha of minimap if player drives over it and update minimap icons
@@ -180,7 +195,7 @@ class Play extends Phaser.Scene{
             from: 0,            // points allow a path are values 0–1
             to: 1,
             delay: 0,
-            duration: 6000,
+            duration: 57000,
             hold: 0,
             repeat: 0,
             yoyo: false,
@@ -189,7 +204,7 @@ class Play extends Phaser.Scene{
         });
         //change instruction text after target is parked
         this.time.addEvent({
-            delay: 6000,
+            delay: 57000,
             callback: ()=>{
                 this.instructions.setText('Hollis has stopped. Press [SPACE] to take a photograph.')
                 this.UIprompt.play()
@@ -371,7 +386,6 @@ class Play extends Phaser.Scene{
     
     //handles car collision
     carCollision(){
-        this.lost= true
         this.cameras.main.shake()
         this.points= 0;
         if (!this.crash1SFX.isPlaying) this.crash1SFX.play()
@@ -380,7 +394,7 @@ class Play extends Phaser.Scene{
             callback: ()=>{
                 this.UIprompt.play()
                 this.bgm.stop()
-                this.scene.start('playScene', {bgm: this.bgm, level: this.level})
+                this.scene.start('playScene2', {bgm: this.bgm, died: true})
             }
         })
     }
@@ -403,41 +417,8 @@ class Play extends Phaser.Scene{
     //recive data from parent scene
     init(data){
         this.bgm= data.bgm;
-        this.level= data.level;
+        this.died= data.died;
         if (!this.bgm.isPlaying) this.bgm.play()
     }
     
-    /*
-    updateCar(car, direction){
-        direction= new Phaser.Math.Vector2(0);
-        if (this.cursors.left.isDown){
-            car.setOrigin(0.4, 0.57)
-            car.body.offset.x= 0;
-            car.angle= 180
-            car.flipY= true;
-            direction.x= -1
-        }else if(this.cursors.right.isDown){
-            car.setOrigin(0.5)
-            car.body.offset.x= 10
-            car.angle= 0;
-            car.flipY= false;
-            direction.x=1
-        }
-        if (this.cursors.up.isDown){
-            car.setOrigin(0.4, 0.7)
-            car.body.offset.x= 0;
-            car.flipY= true
-            car.angle= -90
-            direction.y= -1
-        }else if(this.cursors.down.isDown){
-            car.setOrigin(0.4, 0.4)
-            car.body.offset.x= 0;
-            car.flipY= true
-            car.angle= 90
-            direction.y=1
-        }
-        direction.normalize();
-        car.setVelocity(this.VEL * direction.x, this.VEL * direction.y)
-    }
-    */
 }

@@ -30,7 +30,7 @@ class ScoreDisplay extends Phaser.Scene{
     update(){
         if (this.cursors.space.isDown){
             this.UIsfx.play()
-            this.scene.start('playScene', {bgm: this.bgm, level: 2})
+            this.scene.start('instructionsScene2')
         }
     }
     //collect data passed to this scene from parent scene

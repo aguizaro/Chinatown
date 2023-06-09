@@ -1,7 +1,6 @@
-class Instructions extends Phaser.Scene{
+class Instructions1 extends Phaser.Scene{
     constructor(){
-        super({key: 'instructionsScene'})
-        this.level= 1
+        super({key: 'instructionsScene1'})
         this.changedText= false
     }
 
@@ -48,10 +47,8 @@ class Instructions extends Phaser.Scene{
         //start next scene when space is pressed
         if (this.cursors.space.isDown){
             this.UIsfx.play()
-            this.scene.start('playScene', {bgm: this.bgm, level: 1})
-        }
-        if (this.level == 2 && !this.changedText){
-            //maybe use this to change text or maybe make a new scene for L2 instructions
+            this.bgm.stop()
+            this.scene.start('playScene1', {bgm: this.bgm, died: false})
         }
     }
 }

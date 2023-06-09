@@ -17,7 +17,7 @@ class Title extends Phaser.Scene{
     update(){
         if (this.cursors.space.isDown){
             this.UIsfx.play()
-            this.scene.start('instructionsScene')
+            this.scene.start('instructionsScene1')
         }
     }
 }

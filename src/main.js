@@ -20,7 +20,7 @@ let config = {
     }, 
     zoom: 1.45,
     autoCenter: Phaser.Scale.CENTER_BOTH,
-    scene: [Load, Title, Instructions, ScoreDisplay, Play]
+    scene: [Load, Title, Instructions1, Play1, ScoreDisplay, Instructions2, Play2]
 }
 
 const game= new Phaser.Game(config)
