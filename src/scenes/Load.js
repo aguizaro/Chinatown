@@ -21,6 +21,8 @@ class Load extends Phaser.Scene {
         this.load.image("player","img/car_red.png")
         this.load.image("target","img/car_black.png")
         this.load.image('tilesetImage', 'img/tileset.png')
+        this.load.image('doc', 'img/document.png')
+        this.load.image('bullet', 'img/bullet.png')
         this.load.tilemapTiledJSON('tilemapJSON', 'img/world_map.json')
         this.load.bitmapFont('good_neighbors', 'fonts/good_neighbors_starling.png', 'fonts/good_neighbors_starling.xml')
         // load sound
@@ -30,6 +32,9 @@ class Load extends Phaser.Scene {
         this.load.audio('shutter', 'audio/shutter.wav')
         this.load.audio('crash1', 'audio/crash1.wav')
         this.load.audio('crash2', 'audio/crash2.wav')
+        this.load.audio('fire1', 'audio/fire1.wav')
+        this.load.audio('fire2', 'audio/fire2.wav')
+        this.load.audio('load_rifle', 'audio/load_rifle.wav')
         //this.load.audio('groove', 'audio/groove.mp3');      
     }
 

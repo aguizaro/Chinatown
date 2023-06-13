@@ -2,6 +2,7 @@ class Play1 extends Phaser.Scene{
     constructor(){
         super({key: "playScene1"})
         this.VEL= 100
+        this.level= 1
     }
 
     create(){
@@ -57,11 +58,13 @@ class Play1 extends Phaser.Scene{
         this.tempTarget= this.add.image(776, 880, 'target').setOrigin(0.5).setScale(0.5)
         this.tempTarget.flipX= true;
 
-        //Headquarters Icon on MiniMap
+        //Icons on MiniMap
         this.HQ= this.add.bitmapText(1043, 360, 'good_neighbors', 'HQ', 100 ).setOrigin(0.5).setTint(0xffffff)
         //Minimap Icons for player(Jake Gittes) and target(Hollis Mulwray)
         this.playerIcon= this.add.bitmapText(1021, 298, 'good_neighbors', 'o', 100 ).setOrigin(0.5).setTint(0xff0000)
         this.targetIcon= this.add.bitmapText(776, 880, 'good_neighbors', 'o', 100 ).setOrigin(0.5).setTint(0xffffff)
+        //farm icon
+        this.farmIcon= this.add.bitmapText(650, 1610, 'good_neighbors', 'FARM', 100 ).setOrigin(0.5).setTint(0xffffff)
 
         //enable collision
         this.roadLayer.setCollisionByProperty({collides: true})
@@ -80,13 +83,14 @@ class Play1 extends Phaser.Scene{
         //camera movment
         this.cameras.main.setBounds(0, 0, this.map.widthInPixels, this.map.heightInPixels)
         this.cameras.main.startFollow(this.player, true, 0.25, 0.25)
-        this.cameras.main.ignore([this.HQ, this.playerIcon, this.targetIcon])
+        this.cameras.main.ignore([this.HQ, this.playerIcon, this.targetIcon, this.farmIcon])
         this.cameras.main.setZoom(1)
+        //world bounds
         this.physics.world.bounds.setTo(0, 0, this.map.widthInPixels, this.map.heightInPixels)
        
         //Instructions prompt
         this.instructions= this.add.bitmapText(game.config.width/2 + 40, 20 , 'good_neighbors', 'Find Hollis. Report says he drives a black vehicle.', 18).setOrigin(0.5).setTint(0xffffff).setScrollFactor(0,0).setDepth(100)
-        this.instructions_bg= this.add.rectangle(this.instructions.x, this.instructions.y, this.instructions.width + 60, this.instructions.height + 5, 0x000000, 0.75).setScrollFactor(0,0).setDepth(99)
+        this.instructions_bg= this.add.rectangle(this.instructions.x, this.instructions.y, this.instructions.width + 20, this.instructions.height + 5, 0x000000, 0.75).setScrollFactor(0,0).setDepth(99)
      
         //Displays score and photosRemaining
         this.pointsText= this.add.bitmapText(game.config.width/2 + 265, 8   , 'good_neighbors', 'POINTS', 15).setOrigin(0.5).setTint(0xffffff).setScrollFactor(0,0).setDepth(100)
@@ -97,14 +101,14 @@ class Play1 extends Phaser.Scene{
         this.remainingPhotoDisplay_bg= this.add.rectangle(this.remainingPhotoDisplay.x, this.remainingPhotoDisplay.y, this.remainingPhotoDisplay.width + 20, this.remainingPhotoDisplay.height + 5, 0x000000, 0.75).setScrollFactor(0,0).setDepth(99)
      
         //Minimap
-        this.minimap= this.cameras.add(0, 0, this.map.widthInPixels/6, this.map.heightInPixels/12, false, 'minimap').setZoom(0.14).setRoundPixels(true).setScroll(0,0)
-        this.minimap.setBounds(0, 0, this.map.widthInPixels, this.map.heightInPixels)
+        this.minimap= this.cameras.add(0, 0, this.map.widthInPixels/6, this.map.heightInPixels/10, false, 'minimap').setZoom(0.16).setRoundPixels(true).setScroll(0,0)
+        this.minimap.setBounds(0, 0, this.map.widthInPixels + 240, this.map.heightInPixels + 500)
         this.minimap.startFollow(this.player, true, 0.25,  0.25)
         this.minimap.ignore([this.treeInfraLayer, this.vehicleBuildingLayer, this.roadLayer, this.rockLayer, this.flowerLayer, this.tempTarget, this.instructions, this.instructions_bg, this.player, this.targetFollower, this.ponitsDisplay, this.pointsText, this.ponitsDisplay_bg, this.remainingPhotoText, this.remainingPhotoDisplay, this.remainingPhotoDisplay_bg, this.tempText])
       
         //create mask for minimap
         const maskShape = this.make.graphics();
-        maskShape.fillCircle(90,0, this.minimap.width/1.3)
+        maskShape.fillCircle(93,93, this.minimap.width/2.3)
         const shape= maskShape.createGeometryMask()
         this.minimap.setMask(shape) 
 
@@ -126,6 +130,7 @@ class Play1 extends Phaser.Scene{
         if( (!this.targetActive) && !this.level1_done){
             if(this.checkDistance(this.player, this.tempTarget, 200)){
                 this.instructions.setText('Follow Hollis. Take photographs with [SPACE].')
+                this.instructions_bg.setDisplaySize(this.instructions.width + 20, this.instructions.height + 5)
                 this.UIprompt.play()
                 //this.instructions_bg.setX(this.instructions.x)
                 //this.instructions_bg.setW(this.instructions.width- 50)
@@ -142,7 +147,8 @@ class Play1 extends Phaser.Scene{
         if (this.level1_done){
             if (this.player.x > 973 && this.player.x < 1110){
                 if (this.player.y > 276 && this.player.y < 375){
-                    this.finish_level1()
+                    //finish level 1 and launch score display
+                    this.scene.start('scoreDisplayScene', this)
                     this.level1_done= false;
                 }
             }
@@ -207,6 +213,7 @@ class Play1 extends Phaser.Scene{
             delay: 57000,
             callback: ()=>{
                 this.instructions.setText('Hollis has stopped. Press [SPACE] to take a photograph.')
+                this.instructions_bg.setDisplaySize(this.instructions.width + 20, this.instructions.height + 5)
                 this.UIprompt.play()
                 this.targetStopped= true
                 //wait then continue moving target again
@@ -214,6 +221,7 @@ class Play1 extends Phaser.Scene{
                     delay: this.waitTime,
                     callback: ()=>{
                         this.instructions.setText('Follow Hollis. Take photographs with [SPACE].')
+                        this.instructions_bg.setDisplaySize(this.instructions.width + 20, this.instructions.height + 5)
                         this.UIprompt.play()
                         //start target path 2
                         this.targetStopped= false
@@ -273,6 +281,7 @@ class Play1 extends Phaser.Scene{
             delay: 40000,
             callback: ()=>{
                 this.instructions.setText('Hollis has stopped. Press [SPACE] to take a photograph.')
+                this.instructions_bg.setDisplaySize(this.instructions.width + 20, this.instructions.height + 5)
                 this.UIprompt.play()
                 this.targetStopped= true
                 //wait then continue moving target again
@@ -280,6 +289,7 @@ class Play1 extends Phaser.Scene{
                     delay: this.waitTime,
                     callback: ()=>{
                         this.instructions.setText('Follow Hollis. Take photographs with [SPACE].')
+                        this.instructions_bg.setDisplaySize(this.instructions.width + 20, this.instructions.height + 5)
                         this.UIprompt.play()
                         //start target path 3
                         this.targetStopped= false
@@ -316,6 +326,7 @@ class Play1 extends Phaser.Scene{
             delay: 10000,
             callback: ()=>{
                 this.instructions.setText('Hollis has stopped. Press [SPACE] to take a photograph.')
+                this.instructions_bg.setDisplaySize(this.instructions.width + 20, this.instructions.height + 5)
                 this.UIprompt.play()
                 this.targetStopped= true
                 //wait then continue moving target again
@@ -323,6 +334,7 @@ class Play1 extends Phaser.Scene{
                     delay: this.waitTime,
                     callback: ()=>{
                         this.instructions.setText('Go back to Headquarters')
+                        this.instructions_bg.setDisplaySize(this.instructions.width + 20, this.instructions.height + 5)
                         this.UIprompt.play()
                         //finish this level
                         this.targetStopped= false
@@ -355,12 +367,6 @@ class Play1 extends Phaser.Scene{
                 this.cameraSFX.play()
             }
         }
-    }
-
-    //finish level 1 and launch score display
-    finish_level1(){
-        this.scene.sleep()
-        this.scene.launch('scoreDisplayScene', {score: this.points, photos: this.numPhotos})
     }
 
     //steering for player vehicle
