@@ -6,7 +6,6 @@ class ScoreDisplay extends Phaser.Scene{
 
     create(){
         this.cameras.main.setBackgroundColor(0x82b0fa)
-        //subhead
         if (this.level == 1){
             this.add.bitmapText(game.config.width/2, game.config.height/2 -200, 'good_neighbors', "Level 1 Complete ", 88).setOrigin(0.5).setTint(0xff0000)
             //display photos taken
@@ -31,6 +30,13 @@ class ScoreDisplay extends Phaser.Scene{
             this.add.bitmapText(game.config.width/2 - 70, game.config.height/2, 'good_neighbors', 'life points: .  .  .  .  .  .', 40).setOrigin(0.5).setTint(0xffffff)
             //prompt user to continue
             this.add.bitmapText(game.config.width/2, game.config.height/2 + 200, 'good_neighbors', "Press [SPACE] to start next level.", 30).setOrigin(0.5).setTint(0xffffff)
+        }else{
+            this.add.bitmapText(game.config.width/2, game.config.height/2 -200, 'good_neighbors', "Level 3 Complete ", 88).setOrigin(0.5).setTint(0xff0000)
+            this.add.bitmapText(game.config.width/2, game.config.height/2 -40, 'good_neighbors', "You stopped Noah from getting away.", 40).setOrigin(0.5).setTint(0xffffff)
+            this.add.bitmapText(game.config.width/2, game.config.height/2, 'good_neighbors', "Congratulations! Thanks for playing.", 40).setOrigin(0.5).setTint(0xffffff)
+            //controls
+            this.add.bitmapText(game.config.width/2, game.config.height/2 + 160, 'good_neighbors', "Press [SHIFT] to play again", 30).setOrigin(0.5).setTint(0xffffff)
+            this.add.bitmapText(game.config.width/2, game.config.height/2 + 200, 'good_neighbors', "Press [SPACE] for credits", 30).setOrigin(0.5).setTint(0xff0000)
         }
 
         //input
@@ -45,12 +51,24 @@ class ScoreDisplay extends Phaser.Scene{
         if (this.cursors.space.isDown){
             this.UIsfx.play()
             this.bgm.stop()
-            if (this.level == 1)
-                this.scene.start('instructionsScene', 2)
-            else if (this.level == 2)
-                this.scene.start('instructionsScene', 3)
+            if (this.level == 1){
+                this.level= 2
+                this.scene.start('instructionsScene', this)
+            }
+            else if (this.level == 2){
+                this.level= 3
+                this.scene.start('instructionsScene', this)
+            }
+            else{
+                this.scene.start('creditsScene', this.bgm)
+            }   
+        }
+        if ((this.level == 3) && (this.cursors.shift.isDown)){
+            this.bgm.stop()
+            this.scene.start('titleScene') //start game over again
         }
     }
+
     //collect data passed to this scene from parent scene
     init(data){
         this.score= Math.floor(data.points)

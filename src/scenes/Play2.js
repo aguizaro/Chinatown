@@ -7,8 +7,6 @@ class Play2 extends Phaser.Scene{
 
     create(){
         //game vars
-        this.caught= false
-        this.points= 0;
         this.lockedMovment= false
         this.evidence_collected= 0
         this.lifePoints= 7
@@ -23,7 +21,6 @@ class Play2 extends Phaser.Scene{
         this.tileset= this.map.addTilesetImage('tileset', 'tilesetImage')
         //create SFX
         this.UIprompt= this.sound.add('prompt')
-        this.cameraSFX= this.sound.add('shutter')
         this.crash1SFX= this.sound.add('crash1')
         this.crash2SFX= this.sound.add('crash2')
 
@@ -34,14 +31,13 @@ class Play2 extends Phaser.Scene{
         this.treeInfraLayer= this.map.createLayer('Trees/Infra', this.tileset, 0, 0).setDepth(10)
         this.rockLayer= this.map.createLayer('Rocks', this.tileset, 0, 0)
         this.flowerLayer= this.map.createLayer('Flowers', this.tileset, 0, 0)
+        this.itemLayer= this.map.createLayer('Items', this.tileset, 0, 0).setDepth(10)
 
         //adds player
         this.player= this.physics.add.sprite(572, 1187, 'player', 0).setOrigin(0.5).setScale(0.5).setImmovable(true)
         this.player.body.setCollideWorldBounds(true);
         this.player.body.setCircle(this.player.width/1.7)
         this.player.body.offset.y=20
-
-
 
         //create evidence on the map to be collected by player
         this.evidence= this.physics.add.sprite(546, 1990, 'doc').setScale(0.3)
@@ -51,7 +47,6 @@ class Play2 extends Phaser.Scene{
             this.collect_evidence()
             this.UIprompt.play()
         })
-
 
         //if player previously lost, display text that dissapears
         this.tempText= this.add.bitmapText(this.player.x, this.player.y, 'good_neighbors', 'TRY AGAIN', 100 ).setOrigin(0.5).setTint(0xffffff).setAlpha(0).setDepth(200)
@@ -74,14 +69,18 @@ class Play2 extends Phaser.Scene{
         this.roadLayer.setCollisionByProperty({collides: true})
         this.vehicleBuildingLayer.setCollisionByProperty({collides: true})
         this.treeInfraLayer.setCollisionByProperty({collides: true})
+        this.itemLayer.setCollisionByProperty({collides: true})
         this.physics.add.collider(this.player, this.roadLayer, ()=>{
-            if (!this.crash2SFX.isPlaying) this.worldObjCollision()
+            if (!this.crash2SFX.isPlaying) this.crash2SFX.play()
         })
         this.physics.add.collider(this.player, this.vehicleBuildingLayer, ()=>{
-            if (!this.crash2SFX.isPlaying) this.worldObjCollision()
+            if (!this.crash2SFX.isPlaying) this.crash2SFX.play()
         })
         this.physics.add.collider(this.player, this.treeInfraLayer, ()=>{
-            if (!this.crash2SFX.isPlaying) this.worldObjCollision()
+            if (!this.crash2SFX.isPlaying) this.crash2SFX.play()
+        })
+        this.physics.add.collider(this.player, this.itemLayer, ()=>{
+            if (!this.crash2SFX.isPlaying) this.crash2SFX.play()
         })
     
         //camera movment
@@ -105,13 +104,11 @@ class Play2 extends Phaser.Scene{
         this.evidenceDisplay= this.add.bitmapText(game.config.width/2 + 310, this.evidenceText.y + 22  , 'good_neighbors', this.str, 18).setOrigin(0.5).setTint(0xffffff).setScrollFactor(0,0).setDepth(100)
         this.evidenceDisplay_bg= this.add.rectangle(this.evidenceDisplay.x,  this.evidenceDisplay.y, this.evidenceDisplay.width + 20, this.evidenceDisplay.height + 5, 0x000000, 0.75).setScrollFactor(0,0).setDepth(99)
  
-        
-     
         //Minimap
         this.minimap= this.cameras.add(0, 0, this.map.widthInPixels/6, this.map.heightInPixels/10, false, 'minimap').setZoom(0.16).setRoundPixels(true).setScroll(0,0)
         this.minimap.setBounds(0, 0, this.map.widthInPixels + 240, this.map.heightInPixels + 500)
         this.minimap.startFollow(this.player, true, 0.25,  0.25)
-        this.minimap.ignore([this.treeInfraLayer, this.vehicleBuildingLayer, this.roadLayer, this.rockLayer, this.flowerLayer, this.instructions, this.instructions_bg, this.player, this.evidenceDisplay, this.evidenceText, this.evidenceDisplay_bg, this.tempText, this.evidence, this.lifeText, this.lifeDisplay, this.lifeDisplay_bg])
+        this.minimap.ignore([this.treeInfraLayer, this.vehicleBuildingLayer, this.roadLayer, this.rockLayer, this.flowerLayer, this.itemLayer, this.instructions, this.instructions_bg, this.player, this.evidenceDisplay, this.evidenceText, this.evidenceDisplay_bg, this.tempText, this.evidence, this.lifeText, this.lifeDisplay, this.lifeDisplay_bg])
       
         //create mask for minimap
         const maskShape = this.make.graphics();
@@ -121,8 +118,6 @@ class Play2 extends Phaser.Scene{
 
         //input
         this.cursors= this.input.keyboard.createCursorKeys();
-        //define key
-        space_key = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
     }
 
     update(){
@@ -152,7 +147,6 @@ class Play2 extends Phaser.Scene{
                 if (this.player.y > 276 && this.player.y < 375){
                     //finish level 2 and launch score display
                     this.scene.start('scoreDisplayScene', this)
-                    this.level1_done= false;
                 }
             }
         }
@@ -196,6 +190,7 @@ class Play2 extends Phaser.Scene{
         }
     }
 
+    //makes bullets and shoots them
     startShooting(){
         this.bulletGroup= this.add.group()
         this.direction= new Phaser.Math.Vector2(0);
@@ -229,6 +224,7 @@ class Play2 extends Phaser.Scene{
                 this.cameras.main.shake(500)
             }
         })
+        //start shooting again after a few secs
         this.time.addEvent({
             delay: 8000,
             callback: ()=>{
@@ -250,7 +246,7 @@ class Play2 extends Phaser.Scene{
         this.playerIcon.setPosition(this.player.x, this.player.y)
     }
 
-    //update score and photo display
+    //update life points display and evidence display
     updateUIDisplay(){
         this.str= Phaser.Utils.String.Format('%1 / %2', [this.evidence_collected, 5])
         this.evidenceDisplay.setText(this.str)
@@ -261,17 +257,6 @@ class Play2 extends Phaser.Scene{
         this.lifeDisplay.setText(this.str)
         console.log(this.lifePoints, this.str.length)
     }
-
-    //if distance between object A and object B is less than value, return true, false otherwise
-    checkDistance(A, B, value){
-        return ( this.calcDistance(A, B) < value)
-    }
-    
-    //calculates the distance between two objects A and B
-    calcDistance(A,B){
-        return Math.sqrt((Math.abs(A.x -B.x)*Math.abs(A.x -B.x)) + (Math.abs(A.y -B.y)*Math.abs(A.y -B.y)))
-    }
-
 
     //steering for player vehicle
     updateCar_withSteering(car){
@@ -292,15 +277,6 @@ class Play2 extends Phaser.Scene{
         }else{
             car.setVelocity(0)
         }
-    }
-
-    //event where player collides with game world object
-    worldObjCollision(){
-        this.crash2SFX.play()
-        if (this.points >= 100)
-            this.points-= 100
-        else 
-            this.points= 0
     }
 
     //recive data from parent scene

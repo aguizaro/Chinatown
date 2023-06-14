@@ -9,7 +9,6 @@ class Play1 extends Phaser.Scene{
         //game vars
         this.targetActive= false
         this.targetStopped= false
-        this.caught= false
         this.tookPhoto= false
         this.numPhotos= 0
         this.points= 0;
@@ -33,6 +32,7 @@ class Play1 extends Phaser.Scene{
         this.treeInfraLayer= this.map.createLayer('Trees/Infra', this.tileset, 0, 0).setDepth(10)
         this.rockLayer= this.map.createLayer('Rocks', this.tileset, 0, 0)
         this.flowerLayer= this.map.createLayer('Flowers', this.tileset, 0, 0)
+        this.itemLayer= this.map.createLayer('Items', this.tileset, 0, 0).setDepth(10)
 
         //adds player
         this.player= this.physics.add.sprite(1021, 298, 'player', 0).setOrigin(0.5).setScale(0.5)
@@ -70,6 +70,7 @@ class Play1 extends Phaser.Scene{
         this.roadLayer.setCollisionByProperty({collides: true})
         this.vehicleBuildingLayer.setCollisionByProperty({collides: true})
         this.treeInfraLayer.setCollisionByProperty({collides: true})
+        this.itemLayer.setCollisionByProperty({collides: true})
         this.physics.add.collider(this.player, this.roadLayer, ()=>{
             if (!this.crash2SFX.isPlaying) this.worldObjCollision()
         })
@@ -77,6 +78,9 @@ class Play1 extends Phaser.Scene{
             if (!this.crash2SFX.isPlaying) this.worldObjCollision()
         })
         this.physics.add.collider(this.player, this.treeInfraLayer, ()=>{
+            if (!this.crash2SFX.isPlaying) this.worldObjCollision()
+        })
+        this.physics.add.collider(this.player, this.itemLayer, ()=>{
             if (!this.crash2SFX.isPlaying) this.worldObjCollision()
         })
     
@@ -104,7 +108,7 @@ class Play1 extends Phaser.Scene{
         this.minimap= this.cameras.add(0, 0, this.map.widthInPixels/6, this.map.heightInPixels/10, false, 'minimap').setZoom(0.16).setRoundPixels(true).setScroll(0,0)
         this.minimap.setBounds(0, 0, this.map.widthInPixels + 240, this.map.heightInPixels + 500)
         this.minimap.startFollow(this.player, true, 0.25,  0.25)
-        this.minimap.ignore([this.treeInfraLayer, this.vehicleBuildingLayer, this.roadLayer, this.rockLayer, this.flowerLayer, this.tempTarget, this.instructions, this.instructions_bg, this.player, this.targetFollower, this.ponitsDisplay, this.pointsText, this.ponitsDisplay_bg, this.remainingPhotoText, this.remainingPhotoDisplay, this.remainingPhotoDisplay_bg, this.tempText])
+        this.minimap.ignore([this.treeInfraLayer, this.vehicleBuildingLayer, this.roadLayer, this.rockLayer, this.flowerLayer, this.itemLayer, this.tempTarget, this.instructions, this.instructions_bg, this.player, this.targetFollower, this.ponitsDisplay, this.pointsText, this.ponitsDisplay_bg, this.remainingPhotoText, this.remainingPhotoDisplay, this.remainingPhotoDisplay_bg, this.tempText])
       
         //create mask for minimap
         const maskShape = this.make.graphics();
@@ -132,8 +136,6 @@ class Play1 extends Phaser.Scene{
                 this.instructions.setText('Follow Hollis. Take photographs with [SPACE].')
                 this.instructions_bg.setDisplaySize(this.instructions.width + 20, this.instructions.height + 5)
                 this.UIprompt.play()
-                //this.instructions_bg.setX(this.instructions.x)
-                //this.instructions_bg.setW(this.instructions.width- 50)
                 this.startTargetPath1()
             }
         }
@@ -240,7 +242,6 @@ class Play1 extends Phaser.Scene{
         this.physics.add.collider(this.targetFollower, this.treeInfraLayer)
         this.physics.add.collider(this.player, this.targetFollower, ()=>{
             this.carCollision()
-            this.caught= true;
         })
         //set active since target started movment
         this.targetActive= true;
