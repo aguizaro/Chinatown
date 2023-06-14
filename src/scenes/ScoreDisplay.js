@@ -23,9 +23,9 @@ class ScoreDisplay extends Phaser.Scene{
             //display photos taken
             let str= Phaser.Utils.String.Format('%1 / 5', [5])
             this.add.bitmapText(game.config.width/2 + 170, game.config.height/2 -50, 'good_neighbors', str, 40).setOrigin(0.5).setTint(0xff0000)
-            this.add.bitmapText(game.config.width/2 - 70, game.config.height/2 -50, 'good_neighbors', 'evidence found: .  .  .  .  .  .', 40).setOrigin(0.5).setTint(0xffffff)
+            this.add.bitmapText(game.config.width/2 - 70, game.config.height/2 -50, 'good_neighbors', 'evidence found: .  .  .  .  .   ', 40).setOrigin(0.5).setTint(0xffffff)
             //display score
-            str= Phaser.Utils.String.Format('%1 / 7', [this.lifePoints])
+            str= Phaser.Utils.String.Format('%1 / 8', [this.lifePoints])
             this.add.bitmapText(game.config.width/2 + 170, game.config.height/2, 'good_neighbors', str, 40).setOrigin(0.5).setTint(0xff0000)
             this.add.bitmapText(game.config.width/2 - 70, game.config.height/2, 'good_neighbors', 'life points: .  .  .  .  .  .', 40).setOrigin(0.5).setTint(0xffffff)
             //prompt user to continue

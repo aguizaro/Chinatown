@@ -9,13 +9,10 @@ class Play2 extends Phaser.Scene{
         //game vars
         this.lockedMovment= false
         this.evidence_collected= 0
-        this.lifePoints= 7
-
+        this.lifePoints= 8
         //sfx
         this.fire1= this.sound.add('fire1')
         this.fire2= this.sound.add('fire2')
-        this.load_rifle= this.sound.add('load_rifle')
-
         //tilemap game world
         this.map= this.add.tilemap('tilemapJSON')
         this.tileset= this.map.addTilesetImage('tileset', 'tilesetImage')
@@ -66,10 +63,12 @@ class Play2 extends Phaser.Scene{
         this.farmIcon= this.add.bitmapText(650, 1610, 'good_neighbors', 'FARM', 100 ).setOrigin(0.5).setTint(0xffffff)
 
         //enable collision
+        this.bgLayer.setCollisionByProperty({water: true})
         this.roadLayer.setCollisionByProperty({collides: true})
         this.vehicleBuildingLayer.setCollisionByProperty({collides: true})
         this.treeInfraLayer.setCollisionByProperty({collides: true})
         this.itemLayer.setCollisionByProperty({collides: true})
+        this.physics.add.collider(this.player, this.bgLayer)
         this.physics.add.collider(this.player, this.roadLayer, ()=>{
             if (!this.crash2SFX.isPlaying) this.crash2SFX.play()
         })
@@ -97,7 +96,7 @@ class Play2 extends Phaser.Scene{
      
         //Displays evidence and life points
         this.lifeText= this.add.bitmapText(game.config.width/2 + 310, 8   , 'good_neighbors', 'LIFE', 15).setOrigin(0.5).setTint(0xffffff).setScrollFactor(0,0).setDepth(100)
-        this.lifeDisplay= this.add.bitmapText(game.config.width/2 + 310, this.lifeText.y + 22  , 'good_neighbors', "||||||||||||||", 18).setOrigin(0.5).setTint(0xff0000).setScrollFactor(0,0).setDepth(100)
+        this.lifeDisplay= this.add.bitmapText(game.config.width/2 + 310, this.lifeText.y + 22  , 'good_neighbors', "||||||||||||||||", 18).setOrigin(0.5).setTint(0xff0000).setScrollFactor(0,0).setDepth(100)
         this.lifeDisplay_bg= this.add.rectangle(this.lifeDisplay.x,  this.lifeDisplay.y, this.lifeDisplay.width + 5, this.lifeDisplay.height + 5, 0x000000, 0.75).setScrollFactor(0,0).setDepth(99)
         this.str= Phaser.Utils.String.Format('%1 / %2', [this.evidence_collected, 5])
         this.evidenceText= this.add.bitmapText(game.config.width/2 + 310, 58   , 'good_neighbors', 'EVIDENCE', 15).setOrigin(0.5).setTint(0xffffff).setScrollFactor(0,0).setDepth(100)
@@ -194,7 +193,7 @@ class Play2 extends Phaser.Scene{
     startShooting(){
         this.bulletGroup= this.add.group()
         this.direction= new Phaser.Math.Vector2(0);
-        //array of bullet positions + directions.    ex: [x, y, direction.x, direction.y]
+        //array of bullet objects representing positions + directions.    ex: [x, y, direction.x, direction.y]
         this.bullet_positions= [{x: 0, y: 2000, x_dir: 1, y_dir: 0, flipx: true, flipy: false, rotation: 0}, {x: 0, y: 1920, x_dir: 1, y_dir: 0, flipx: true, flipy: false, rotation: 0}, {x: 0, y: 1820, x_dir: 1, y_dir: 0, flipx: true, flipy: false, rotation: 0}, {x: 0, y: 1720, x_dir: 1, y_dir: 0, flipx: true, flipy: false, rotation: 0}, {x: 0, y: 1500, x_dir: 1, y_dir: 0, flipx: true, flipy: false, rotation: 0}, {x: 0, y: 1420, x_dir: 1, y_dir: 0, flipx: true, flipy: false, rotation: 0},
                                 {x: 276, y: 2112, x_dir: 0, y_dir: -1, flipx: true, flipy: false, rotation: -Math.PI/2}, {x: 225, y: 2112, x_dir: 0, y_dir: -1, flipx: true, flipy: false, rotation: -Math.PI/2}, {x: 120, y: 2112, x_dir: 0, y_dir: -1, flipx: true, flipy: false, rotation: -Math.PI/2}, {x: 59, y: 2112, x_dir: 0, y_dir: -1, flipx: true, flipy: false, rotation: -Math.PI/2},
                                 {x: 362, y: 1368, x_dir: 0, y_dir: 1, flipx: true, flipy: true, rotation: Math.PI/2}, {x: 540, y: 1368, x_dir: 0, y_dir: 1, flipx: true, flipy: true, rotation: Math.PI/2}, {x: 780, y: 1368, x_dir: 0, y_dir: 1, flipx: true, flipy: true, rotation: Math.PI/2}, {x: 912, y: 1368, x_dir: 0, y_dir: 1, flipx: true, flipy: true, rotation: Math.PI/2}]
@@ -255,7 +254,7 @@ class Play2 extends Phaser.Scene{
             this.str+= '||'
         }
         this.lifeDisplay.setText(this.str)
-        console.log(this.lifePoints, this.str.length)
+        //console.log(this.lifePoints, this.str.length)
     }
 
     //steering for player vehicle

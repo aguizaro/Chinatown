@@ -1,5 +1,25 @@
-// Antonio Guizar Orozco
-// Chinatown 1974
+/* 
+    Antonio Guizar Orozco
+    Chinatown 1974
+
+    Phaser components used:
+    - Cameras
+    - Physics systems
+    - Bitmap Text
+    - Tileset/Tilemap
+    - Time Events
+    - Random
+    - Paths Follower
+    
+    Creative Tilt:
+    - I think my world building went beyond what was expected for this project as well as the various game systems/mechanics I
+      included work well with the game theme/feel:
+        - Vehicle steering
+        - Photography
+        - Life points / score
+        - Speed boost
+*/
+
 
 'use strict';
 

@@ -67,10 +67,12 @@ class Play1 extends Phaser.Scene{
         this.farmIcon= this.add.bitmapText(650, 1610, 'good_neighbors', 'FARM', 100 ).setOrigin(0.5).setTint(0xffffff)
 
         //enable collision
+        this.bgLayer.setCollisionByProperty({water: true})
         this.roadLayer.setCollisionByProperty({collides: true})
         this.vehicleBuildingLayer.setCollisionByProperty({collides: true})
         this.treeInfraLayer.setCollisionByProperty({collides: true})
         this.itemLayer.setCollisionByProperty({collides: true})
+        this.physics.add.collider(this.player, this.bgLayer)
         this.physics.add.collider(this.player, this.roadLayer, ()=>{
             if (!this.crash2SFX.isPlaying) this.worldObjCollision()
         })
@@ -155,8 +157,7 @@ class Play1 extends Phaser.Scene{
                 }
             }
         }
-
-        console.log(this.player.x, this.player.y);
+        //console.log(this.player.x, this.player.y);
     }
 
     //reduce alpha of minimap if player drives over it and update minimap icons

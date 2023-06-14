@@ -8,7 +8,7 @@ class Play3 extends Phaser.Scene{
     create(){
         //game vars
         this.targetActive= false
-        this.level3_done= false
+        this.collided= false
         //tilemap game world
         this.map= this.add.tilemap('tilemapJSON')
         this.tileset= this.map.addTilesetImage('tileset', 'tilesetImage')
@@ -57,9 +57,11 @@ class Play3 extends Phaser.Scene{
         this.targetIcon= this.add.bitmapText(776, 880, 'good_neighbors', 'o', 100 ).setOrigin(0.5).setTint(0xffffff)
 
         //enable collision
+        this.bgLayer.setCollisionByProperty({water: true})
         this.roadLayer.setCollisionByProperty({collides: true})
         this.vehicleBuildingLayer.setCollisionByProperty({collides: true})
         this.treeInfraLayer.setCollisionByProperty({collides: true})
+        this.physics.add.collider(this.player, this.bgLayer)
         this.physics.add.collider(this.player, this.roadLayer, ()=>{
             if (!this.crash2SFX.isPlaying) this.crash2SFX.play()
         })
@@ -103,7 +105,7 @@ class Play3 extends Phaser.Scene{
         this.updateMiniMap()//update minimap  
 
         //check distance and start target movement if close enough during level1
-        if( (!this.targetActive) && !this.level3_done){
+        if (!this.targetActive){
             if(this.checkDistance(this.player, this.tempTarget, 200)){
                 this.instructions.setText('There he is. Stop him.  Hold [SPACE] for a speed boost')
                 this.instructions_bg.setDisplaySize(this.instructions.width + 20, this.instructions.height + 5)
@@ -200,7 +202,7 @@ class Play3 extends Phaser.Scene{
         this.physics.add.collider(this.targetFollower, this.vehicleBuildingLayer)
         this.physics.add.collider(this.targetFollower, this.treeInfraLayer)
         this.physics.add.collider(this.player, this.targetFollower, ()=>{
-            this.carCollision()
+            if (!this.collided) this.carCollision()
         })
         //set active since target started movment
         this.targetActive= true;
@@ -230,7 +232,7 @@ class Play3 extends Phaser.Scene{
     //handles car collision
     carCollision(){
         this.cameras.main.shake()
-        this.targetFollower.stop()
+        this.targetFollower.pauseFollow()
         if (!this.crash1SFX.isPlaying) this.crash1SFX.play()
         this.time.addEvent({
             delay: 1000,
@@ -239,6 +241,7 @@ class Play3 extends Phaser.Scene{
                 this.scene.start('scoreDisplayScene', this)
             }
         })
+        this.collided= true
     }
 
     //recive data from parent scene
