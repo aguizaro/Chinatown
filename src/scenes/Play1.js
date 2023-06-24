@@ -369,6 +369,18 @@ class Play1 extends Phaser.Scene{
                 this.cameraSFX.play()
             }
         }
+        //check if player used up all 50 shots
+        if (this.photosRemaining <= 0){
+            this.time.addEvent({ //if so, end level 1
+                delay: 1000,
+                callback: ()=>{
+                    this.instructions.setText('Go back to Headquarters')
+                    this.instructions_bg.setDisplaySize(this.instructions.width + 20, this.instructions.height + 5)
+                    this.UIprompt.play()
+                    this.level1_done= true
+                }
+            })
+        }
     }
 
     //steering for player vehicle
